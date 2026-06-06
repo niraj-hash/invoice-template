@@ -1,0 +1,248 @@
+/* ============ Base ============ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: #eef1f5;
+  color: #1a1a1a;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: #1f2a44;
+  color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+.app-header h1 { font-size: 18px; font-weight: 600; }
+.actions { display: flex; gap: 10px; }
+
+.btn {
+  border: none;
+  border-radius: 6px;
+  padding: 9px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform .05s, opacity .15s;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: #2e7d32; color: #fff; }
+.btn-primary:hover { background: #276b2a; }
+.btn-secondary { background: #41506e; color: #fff; }
+.btn-secondary:hover { background: #4d5d80; }
+
+/* ============ Layout ============ */
+.layout {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 24px;
+  padding: 24px;
+  align-items: start;
+}
+@media (max-width: 1000px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+/* ============ Form ============ */
+.form-panel {
+  background: #fff;
+  border-radius: 10px;
+  padding: 8px 18px 18px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  position: sticky;
+  top: 78px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+fieldset {
+  border: 1px solid #e2e6ec;
+  border-radius: 8px;
+  padding: 14px;
+  margin-top: 16px;
+}
+legend {
+  font-weight: 700;
+  font-size: 13px;
+  color: #2e7d32;
+  padding: 0 6px;
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #50596b;
+  margin-top: 10px;
+}
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.checkbox-label input { width: auto; margin: 0; }
+
+input, textarea, select {
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px 10px;
+  border: 1px solid #d3d9e2;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fff;
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 2px rgba(46,125,50,.15);
+}
+textarea { resize: vertical; }
+
+.row { display: flex; gap: 12px; }
+.row > label { flex: 1; }
+
+.hidden-fields.collapsed { display: none; }
+
+/* Line item rows in form */
+.item-card {
+  border: 1px dashed #ccd3dd;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 10px;
+  position: relative;
+}
+.item-card .remove-item {
+  position: absolute;
+  top: 8px; right: 8px;
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  width: 22px; height: 22px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* ============ Invoice Preview ============ */
+.preview-panel { display: flex; justify-content: center; }
+
+.invoice {
+  width: 794px;            /* A4 width at 96dpi = 210mm */
+  min-height: 1110px;      /* just under A4 height (1123px) so the PDF stays 1 page */
+  background: #fff;
+  padding: 18px;
+  border: 1px solid #000;
+  box-shadow: 0 2px 12px rgba(0,0,0,.12);
+  font-size: 12px;
+  color: #000;
+}
+
+.inv-title {
+  text-align: center;
+  font-weight: 700;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.invoice table { width: 100%; border-collapse: collapse; }
+.invoice td, .invoice th { border: 1px solid #000; vertical-align: top; padding: 4px 6px; }
+
+/* Header block */
+.inv-head .seller-cell { width: 52%; }
+.seller-name { font-weight: 700; font-size: 13px; }
+.seller-addr { white-space: pre-line; }
+.inv-head .meta-cell { width: 24%; }
+.meta-label { display: block; font-size: 11px; }
+.meta-value { font-weight: 700; }
+.meta-cell.empty { height: 18px; }
+.meta-cell.tall { height: 60px; }
+
+.party-cell { padding: 2px 6px; }
+.party-label { font-size: 11px; color: #222; }
+.party-name { font-weight: 700; }
+.party-addr { white-space: pre-line; }
+.gst-line { display: flex; gap: 6px; }
+.gst-line span:first-child { display: inline-block; min-width: 84px; }
+
+/* Items table */
+.inv-items th {
+  background: #fff;
+  text-align: center;
+  font-weight: 700;
+  font-size: 11px;
+}
+.inv-items .c-sl { width: 4%; }
+.inv-items .c-desc { width: 40%; text-align: left; }
+.inv-items .c-hsn { width: 11%; }
+.inv-items .c-qty { width: 11%; }
+.inv-items .c-rate { width: 11%; }
+.inv-items .c-per { width: 6%; }
+.inv-items .c-amt { width: 17%; }
+
+/* Body: keep vertical column dividers continuous, drop horizontal lines */
+.inv-items tbody td { border-top: 0; border-bottom: 0; }
+.inv-items .it-sl { text-align: center; }
+.inv-items .it-desc { font-weight: 700; }
+.inv-items .it-hsn { text-align: center; }
+.inv-items .it-qty, .inv-items .it-rate, .inv-items .it-amt { text-align: right; }
+.inv-items .it-per { text-align: center; }
+.inv-items .sub-line .lbl { text-align: right; font-weight: 700; }
+.inv-items .sub-line .val { text-align: right; font-weight: 700; }
+.inv-items .spacer-row td { height: 180px; }
+
+.total-row td { border-top: 1px solid #000; }
+.total-row .t-label { text-align: right; font-weight: 700; }
+.total-row .t-amount { text-align: right; font-weight: 700; }
+
+/* Words row */
+.inv-words td:first-child { width: 78%; }
+.words-label { font-size: 11px; }
+.words-value { font-weight: 700; }
+.eoe { text-align: right; font-style: italic; }
+
+/* Tax table */
+.inv-tax th { text-align: center; font-weight: 700; font-size: 11px; }
+.inv-tax .tx-hsn { width: 40%; text-align: left; }
+.inv-tax .tx-tv, .inv-tax .tx-rate, .inv-tax .tx-amt, .inv-tax .tx-total { text-align: right; }
+.inv-tax tbody td { text-align: right; }
+.inv-tax tbody td:first-child { text-align: left; }
+.inv-tax tbody .tx-rate-cell { text-align: center; }
+.inv-tax .tx-foot-label { text-align: right; font-weight: 700; }
+.inv-tax tfoot td { font-weight: 700; }
+
+/* Tax words */
+.inv-taxwords .twk { font-size: 11px; }
+.inv-taxwords .twv { font-weight: 700; }
+
+/* Signature */
+.inv-sign .sign-cell { height: 70px; text-align: right; position: relative; }
+.sign-for { font-weight: 700; }
+.sign-auth { position: absolute; bottom: 4px; right: 6px; }
+
+/* Footer */
+.inv-footer {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* ============ Print ============ */
+@media print {
+  body { background: #fff; }
+  .app-header, .form-panel { display: none !important; }
+  .layout { display: block; padding: 0; }
+  .preview-panel { display: block; }
+  .invoice { box-shadow: none; border: 1px solid #000; width: 100%; min-height: auto; }
+}

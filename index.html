@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GST Tax Invoice Generator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>GST Tax Invoice Generator</h1>
+    <div class="actions">
+      <button type="button" id="addItemBtn" class="btn btn-secondary">+ Add Item</button>
+      <button type="button" id="downloadBtn" class="btn btn-primary">Download PDF</button>
+      <button type="button" id="printBtn" class="btn btn-secondary">Print</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- ============ FORM PANEL ============ -->
+    <section class="form-panel">
+      <form id="invoiceForm" autocomplete="off">
+
+        <fieldset>
+          <legend>Seller (Your Company)</legend>
+          <label>Company Name <input type="text" id="sellerName" value="BuckBox Infotech Private Limited" /></label>
+          <label>Address <textarea id="sellerAddress" rows="3">6th Floor, 609, 610, Gala Empire,
+Drive In Road, Opp. Durdarshan Center,
+Thaltej, Ahmedabad,</textarea></label>
+          <label>GSTIN/UIN <input type="text" id="sellerGstin" value="24AAKCB7684E1ZH" /></label>
+          <div class="row">
+            <label>State Name <input type="text" id="sellerState" value="Gujarat" /></label>
+            <label>Code <input type="text" id="sellerStateCode" value="24" /></label>
+          </div>
+          <label>E-Mail <input type="email" id="sellerEmail" value="accounts@buckbox.tech" /></label>
+          <label>Jurisdiction <input type="text" id="jurisdiction" value="AHMEDABAD" /></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Invoice Details</legend>
+          <div class="row">
+            <label>Invoice No. <input type="text" id="invoiceNo" value="BIPL/2526/103" /></label>
+            <label>Date <input type="date" id="invoiceDate" value="2025-11-30" /></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Consignee (Ship To)</legend>
+          <label>Name <input type="text" id="shipName" value="Vyko Systems Private Limited" /></label>
+          <label>Address <textarea id="shipAddress" rows="3">25/5(11/5)
+Mannar Street
+Chennai
+Chennai</textarea></label>
+          <div class="row">
+            <label>GSTIN/UIN <input type="text" id="shipGstin" value="33AAICK7588E1Z8" /></label>
+          </div>
+          <div class="row">
+            <label>State Name <input type="text" id="shipState" value="Tamil Nadu" /></label>
+            <label>Code <input type="text" id="shipStateCode" value="33" /></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Buyer (Bill To)</legend>
+          <label class="checkbox-label">
+            <input type="checkbox" id="sameAsShip" checked /> Same as Consignee
+          </label>
+          <div id="buyerFields" class="hidden-fields">
+            <label>Name <input type="text" id="buyerName" value="Vyko Systems Private Limited" /></label>
+            <label>Address <textarea id="buyerAddress" rows="3">25/5(11/5)
+Mannar Street
+Chennai
+Chennai</textarea></label>
+            <div class="row">
+              <label>GSTIN/UIN <input type="text" id="buyerGstin" value="33AAICK7588E1Z8" /></label>
+            </div>
+            <div class="row">
+              <label>State Name <input type="text" id="buyerState" value="Tamil Nadu" /></label>
+              <label>Code <input type="text" id="buyerStateCode" value="33" /></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Line Items</legend>
+          <div id="itemsContainer"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Tax & Rounding</legend>
+          <div class="row">
+            <label>Tax Type
+              <select id="taxType">
+                <option value="igst" selected>IGST (Inter-State)</option>
+                <option value="cgst_sgst">CGST + SGST (Intra-State)</option>
+              </select>
+            </label>
+            <label>GST Rate (%) <input type="number" id="gstRate" value="18" step="0.01" /></label>
+          </div>
+          <label class="checkbox-label">
+            <input type="checkbox" id="roundOff" checked /> Apply Rounding Off
+          </label>
+        </fieldset>
+
+      </form>
+    </section>
+
+    <!-- ============ PREVIEW PANEL ============ -->
+    <section class="preview-panel">
+      <div id="invoice" class="invoice">
+        <div class="inv-title">Tax Invoice</div>
+
+        <table class="inv-head">
+          <tr>
+            <td class="seller-cell" rowspan="3">
+              <div class="seller-name" id="pSellerName"></div>
+              <div class="seller-addr" id="pSellerAddress"></div>
+              <div id="pSellerGstin"></div>
+              <div id="pSellerState"></div>
+              <div id="pSellerEmail"></div>
+            </td>
+            <td class="meta-cell">
+              <span class="meta-label">Invoice No.</span>
+              <span class="meta-value" id="pInvoiceNo"></span>
+            </td>
+            <td class="meta-cell">
+              <span class="meta-label">Dated</span>
+              <span class="meta-value" id="pInvoiceDate"></span>
+            </td>
+          </tr>
+          <tr><td class="meta-cell empty" colspan="2"></td></tr>
+          <tr><td class="meta-cell empty tall" colspan="2"></td></tr>
+
+          <tr>
+            <td class="party-cell">
+              <div class="party-label">Consignee (Ship to)</div>
+              <div class="party-name" id="pShipName"></div>
+              <div class="party-addr" id="pShipAddress"></div>
+              <div class="gst-line"><span>GSTIN/UIN</span><span id="pShipGstin"></span></div>
+              <div class="gst-line"><span>State Name</span><span id="pShipState"></span></div>
+            </td>
+            <td class="meta-cell empty" colspan="2" rowspan="2"></td>
+          </tr>
+          <tr>
+            <td class="party-cell">
+              <div class="party-label">Buyer (Bill to)</div>
+              <div class="party-name" id="pBuyerName"></div>
+              <div class="party-addr" id="pBuyerAddress"></div>
+              <div class="gst-line"><span>GSTIN/UIN</span><span id="pBuyerGstin"></span></div>
+              <div class="gst-line"><span>State Name</span><span id="pBuyerState"></span></div>
+            </td>
+          </tr>
+        </table>
+
+        <table class="inv-items">
+          <thead>
+            <tr>
+              <th class="c-sl">Sl<br>No.</th>
+              <th class="c-desc">Particulars</th>
+              <th class="c-hsn">HSN/SAC</th>
+              <th class="c-qty">Quantity</th>
+              <th class="c-rate">Rate</th>
+              <th class="c-per">per</th>
+              <th class="c-amt">Amount</th>
+            </tr>
+          </thead>
+          <tbody id="pItemsBody"></tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td colspan="6" class="t-label">Total</td>
+              <td class="t-amount" id="pGrandTotal"></td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <table class="inv-words">
+          <tr>
+            <td>
+              <div class="words-label">Amount Chargeable (in words)</div>
+              <div class="words-value" id="pAmountWords"></div>
+            </td>
+            <td class="eoe">E. &amp; O.E</td>
+          </tr>
+        </table>
+
+        <table class="inv-tax">
+          <thead>
+            <tr>
+              <th rowspan="2" class="tx-hsn">HSN/SAC</th>
+              <th rowspan="2" class="tx-tv">Taxable<br>Value</th>
+              <th colspan="2" id="pTaxHeadGroup">IGST</th>
+              <th rowspan="2" class="tx-total">Total<br>Tax Amount</th>
+            </tr>
+            <tr>
+              <th class="tx-rate">Rate</th>
+              <th class="tx-amt">Amount</th>
+            </tr>
+          </thead>
+          <tbody id="pTaxBody"></tbody>
+          <tfoot>
+            <tr>
+              <td class="tx-foot-label">Total</td>
+              <td class="tx-tv" id="pTaxTotalTaxable"></td>
+              <td></td>
+              <td class="tx-amt" id="pTaxTotalAmount"></td>
+              <td class="tx-total" id="pTaxTotalTax"></td>
+            </tr>
+          </tfoot>
+        </table>
+
+        <table class="inv-taxwords">
+          <tr>
+            <td><span class="twk">Tax Amount (in words)</span> :
+              <span class="twv" id="pTaxWords"></span></td>
+          </tr>
+        </table>
+
+        <table class="inv-sign">
+          <tr>
+            <td class="sign-cell">
+              <div class="sign-for">for <span id="pSellerNameSign"></span></div>
+              <div class="sign-auth">Authorised Signatory</div>
+            </td>
+          </tr>
+        </table>
+
+        <div class="inv-footer">
+          <div>SUBJECT TO <span id="pJurisdiction"></span> JURISDICTION</div>
+          <div>This is a Computer Generated Invoice</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
