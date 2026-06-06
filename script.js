@@ -123,7 +123,10 @@ function readItems() {
     const rate = parseFloat(card.querySelector(".it-rate-in").value) || 0;
     let amount = parseFloat(card.querySelector(".it-amt-in").value);
     if (isNaN(amount)) amount = qty * rate;
-    return { desc, hsn, per, qty, rate, amount };
+    // "Settlement Amount" lines are informational: shown on the invoice but
+    // excluded from taxable value, tax, rounding and the grand total.
+    const excluded = desc.trim().toLowerCase() === "settlement amount";
+    return { desc, hsn, per, qty, rate, amount, excluded };
   });
 }
 
@@ -176,7 +179,7 @@ function render() {
   const items = readItems();
   const taxType = val("taxType");
   const gstRate = parseFloat(val("gstRate")) || 0;
-  const taxable = items.reduce((s, it) => s + it.amount, 0);
+  const taxable = items.reduce((s, it) => s + (it.excluded ? 0 : it.amount), 0);
   const taxTotal = taxable * gstRate / 100;
 
   // Build items body
@@ -238,9 +241,10 @@ function render() {
   const taxHead = $("pTaxHeadGroup");
   const taxBody = $("pTaxBody");
   taxBody.innerHTML = "";
-  // group by HSN
+  // group by HSN (excluded "Settlement Amount" lines don't contribute to tax)
   const groups = {};
   items.forEach((it) => {
+    if (it.excluded) return;
     groups[it.hsn] = (groups[it.hsn] || 0) + it.amount;
   });
 
