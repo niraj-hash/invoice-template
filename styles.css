@@ -141,11 +141,16 @@ textarea { resize: vertical; }
   width: 794px;            /* A4 width at 96dpi = 210mm */
   min-height: 1110px;      /* just under A4 height (1123px) so the PDF stays 1 page */
   background: #fff;
-  padding: 18px;
-  border: 1px solid #000;
+  padding: 6px;            /* white gutter so the border never sits on the page-cut edge */
   box-shadow: 0 2px 12px rgba(0,0,0,.12);
   font-size: 12px;
   color: #000;
+}
+
+/* The bordered invoice box, inset from the page edge by .invoice's padding */
+.sheet {
+  border: 1px solid #000;
+  padding: 12px;
 }
 
 .inv-title {
