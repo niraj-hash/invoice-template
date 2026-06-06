@@ -125,7 +125,9 @@ function readItems() {
     if (isNaN(amount)) amount = qty * rate;
     // "Settlement Amount" lines are informational: shown on the invoice but
     // excluded from taxable value, tax, rounding and the grand total.
-    const excluded = desc.trim().toLowerCase() === "settlement amount";
+    // Matches whenever "Settlement Amount" appears anywhere in the Particulars
+    // (e.g. "Settlement Amount", "Settlement Amount (Nov 2025)").
+    const excluded = desc.toLowerCase().includes("settlement amount");
     return { desc, hsn, per, qty, rate, amount, excluded };
   });
 }
