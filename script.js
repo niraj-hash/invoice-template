@@ -311,23 +311,67 @@ document.getElementById("addItemBtn").addEventListener("click", () => {
 document.getElementById("downloadBtn").addEventListener("click", () => {
   const el = document.getElementById("invoice");
   const invNo = (val("invoiceNo") || "invoice").replace(/[^\w.-]+/g, "_");
-  // The invoice is 794px wide = exactly 210mm (A4 width) at 96dpi, so any PDF
-  // margin would push the right edge off the page. Use margin 0 and rely on the
-  // invoice's own internal padding for whitespace.
+
+  // The invoice element has a fixed 794px width (= 210mm @ 96dpi) and any
+  // CSS transform used to scale the LIVE preview on small screens is
+  // suppressed for PDF capture by `.pdf-rendering` (see styles.css), so
+  // html2pdf always sees the full-size A4 layout regardless of viewport.
+  document.body.classList.add("pdf-rendering");
+
   const opt = {
     margin: 0,
     filename: `Invoice_${invNo}.pdf`,
     image: { type: "jpeg", quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, scrollX: 0, scrollY: 0 },
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff",
+      scrollX: 0,
+      scrollY: 0,
+    },
     jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
     pagebreak: { mode: ["avoid-all", "css"] },
   };
-  html2pdf().set(opt).from(el).save();
+
+  html2pdf()
+    .set(opt)
+    .from(el)
+    .save()
+    .finally(() => document.body.classList.remove("pdf-rendering"));
 });
 
 document.getElementById("printBtn").addEventListener("click", () => window.print());
+
+/* ---------- Responsive preview scaling ---------- */
+/*
+ * .invoice stays a rigid 794px so the PDF is identical on every device.
+ * For the live preview we measure the available panel width and apply a
+ * CSS scale (transform) so the user can always see the whole invoice
+ * without horizontal scroll on a small laptop / tablet.
+ */
+const INVOICE_LOGICAL_W = 794;
+const previewPanel = document.querySelector(".preview-panel");
+const invoiceScale = document.getElementById("invoiceScale");
+const invoiceEl = document.getElementById("invoice");
+
+function fitInvoicePreview() {
+  if (!previewPanel || !invoiceScale || !invoiceEl) return;
+  // Inline padding of the panel could subtract from usable width.
+  const available = previewPanel.clientWidth;
+  const scale = Math.min(1, available / INVOICE_LOGICAL_W);
+  invoiceScale.style.setProperty("--inv-scale", scale.toFixed(4));
+  // Reserve the scaled visual footprint so the page lays out correctly.
+  const realH = invoiceEl.offsetHeight || 1110;
+  invoiceScale.style.width = Math.ceil(INVOICE_LOGICAL_W * scale) + "px";
+  invoiceScale.style.height = Math.ceil(realH * scale) + "px";
+}
+
+window.addEventListener("resize", fitInvoicePreview);
 
 /* ---------- Init ---------- */
 makeItem(); // one default item matching the sample invoice
 syncBuyerToggle();
 render();
+fitInvoicePreview();
+// Re-fit after any user input that might change invoice height.
+document.getElementById("invoiceForm").addEventListener("input", fitInvoicePreview);

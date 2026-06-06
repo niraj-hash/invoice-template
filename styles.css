@@ -135,7 +135,27 @@ textarea { resize: vertical; }
 }
 
 /* ============ Invoice Preview ============ */
-.preview-panel { display: flex; justify-content: center; }
+/*
+ * The .invoice itself is FIXED at 794px (A4 width at 96dpi) — never resized,
+ * so the generated PDF is byte-identical regardless of viewport. To make the
+ * live preview fit on small screens, we wrap it in .invoice-scale and apply
+ * a CSS transform on the wrapper. The transform is suppressed during PDF
+ * capture via the .pdf-rendering class on <body> (set by script.js).
+ */
+.preview-panel {
+  display: flex;
+  justify-content: center;
+  overflow: hidden;          /* hide any scaling overflow */
+}
+.invoice-scale {
+  transform-origin: top left;
+  /* JS sets --inv-scale based on the available panel width */
+  transform: scale(var(--inv-scale, 1));
+  width: 794px;              /* logical width before scaling */
+  /* After scaling, the *visual* footprint is 794 * scale; reserve that
+   * height/width so surrounding layout doesn't get the unscaled footprint. */
+}
+body.pdf-rendering .invoice-scale { transform: none !important; }
 
 .invoice {
   width: 794px;            /* A4 width at 96dpi = 210mm */
